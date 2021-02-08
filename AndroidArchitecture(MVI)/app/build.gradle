@@ -1,0 +1,99 @@
+import dependencies.*
+
+plugins {
+    id 'com.android.application'
+    id 'kotlin-android'
+    id 'kotlin-android-extensions'
+    id 'kotlin-kapt'
+}
+
+configurations.all {
+    resolutionStrategy.eachDependency { DependencyResolveDetails details ->
+        def requested = details.requested
+        if (requested.group == "androidx.appcompat") {
+            if (!requested.name.startsWith("multidex")) {
+                details.useVersion "1.+"
+            }
+        }
+    }
+}
+
+android {
+    compileSdkVersion Versions.compilesdk
+    buildToolsVersion Versions.build_tool_version
+
+    defaultConfig {
+        applicationId ApplicationDependencies.app_id
+        minSdkVersion Versions.min_sdk
+        targetSdkVersion Versions.target_sdk
+        versionCode Versions.version_code
+        versionName Versions.version_name
+
+        testInstrumentationRunner TestDependencies.android_junit_instrumentation
+    }
+
+    dexOptions {
+        incremental true
+        javaMaxHeapSize "4g"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+
+
+    compileOptions {
+        sourceCompatibility Versions.java_version
+        targetCompatibility Versions.java_version
+    }
+    kotlinOptions {
+        jvmTarget = Versions.java_version
+    }
+}
+
+dependencies {
+
+    //Dependencies
+    implementation Dependencies.kotlin_stdlib
+    implementation Dependencies.core_ktx
+    // -- Retrofit2
+    implementation Dependencies.retrofit
+    implementation Dependencies.retrofit_converter_gson // To convert from retrofit
+
+    // -- Lifecycle Components (ViewModel, LiveData and ReactiveStreams)
+    implementation Dependencies.lifecycle_extensions
+    implementation 'androidx.appcompat:appcompat:1.2.0'
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+    // For creating viewmodel provider
+    kapt Dependencies.lifecycle_compiler
+
+    // -- Coroutines
+    implementation Dependencies.core_ktx
+    implementation Dependencies.kotlinx_coroutines_android
+
+    // RecyclerView
+    implementation Dependencies.recyclerview
+
+    //glide
+    implementation Dependencies.glide
+    kapt Dependencies.glide_compiler
+
+    // Leak Canary (detecting memory leaks)
+    debugImplementation Dependencies.leakcanary_android
+
+    //Swipe Refresh
+    implementation Dependencies.swipe_refresh
+
+    //Support Design
+    implementation SupportDependencies.appcompat
+    implementation SupportDependencies.material
+    implementation SupportDependencies.constraintlayout
+
+    //Test
+    testImplementation TestDependencies.junit
+    androidTestImplementation TestDependencies.test_ext
+    androidTestImplementation TestDependencies.espresso
+}
